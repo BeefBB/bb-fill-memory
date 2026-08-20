@@ -1,0 +1,14 @@
+build/
+dist/
+test/
+venv/
+.venv/
+__pycache__/
+
+.directory
+
+
+frozen.txt
+
+*.spec
+*.exe
