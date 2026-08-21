@@ -25,6 +25,9 @@ def fill_memory(keep_time=15, keep_free=256, block_size=128):
 
             print(f"Available: {psutil.virtual_memory().available / 1024**3:.2f} GB")
 
+        else:
+            time.sleep(0.01)
+
 
 if __name__ == "__main__":
 
