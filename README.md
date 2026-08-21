@@ -17,6 +17,28 @@
 執行時, 記憶體將會持續接近全滿  
 Windows 可能不斷增加虛擬記憶體, 或是激進的管理記憶體, 電腦可能會非常卡頓, 甚至崩潰  
 
+# 參數
+
+BB Fill Memory 支援以下命令列參數:  
+
+參數      |預設值 |單位 |說明
+:---      |:---   |:--- |:---
+`--time`  |`15`   |s    |持續填滿記憶體的時間
+`--free`  |`256`  |MiB  |最少保留的可用記憶體
+`--block` |`128`  |MiB  |每次增加的記憶體量
+
+### 範例
+
+預設  
+```Bash
+".\BB Fill Memory.exe"
+```
+
+持續 30 秒, 保留 512 MiB  
+```Bash
+".\BB Fill Memory.exe" --time=30 --free=512
+```
+
 # 想自己編譯?
 
 ## 執行
@@ -30,7 +52,7 @@ pip install -r requirements.txt
 pyinstaller --noconfirm --onefile --name="BB Fill Memory" bb-fill-memory.py
 ```
 
-打包後會在 `./dist`  
+打包後會在 `.\dist`  
 
 # 版權
 
