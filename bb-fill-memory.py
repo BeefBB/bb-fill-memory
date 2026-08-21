@@ -1,31 +1,57 @@
 import time
+import argparse
 import psutil
 
 
-"""
-這個程式會在幾秒內盡可能吃光記憶體
-用來強迫Windows釋放或管理記憶體
-"""
+def fill_memory(keep_time=15, keep_free=256, block_size=128):
+    """
+    Args:
+        keep_time:  持續時間 (s)
+        keep_free:  保留記憶體空間 (MiB)
+        block_size: 每次增加記憶體量 (MiB)
+    """
 
-
-def fill_memory():
-
-    KEEP_TIME = 15                  # 持續 (s)
-    KEEP_FREE = 256 * 1024 * 1024   # 保留 (MB)
-    BLOCK_SIZE = 128 * 1024 * 1024  # 每次吃 (MB)
+    keep_free *= 1024 ** 2
+    block_size *= 1024 ** 2
 
     memory = []
-    t_0 = time.time()
+    t_0 = time.monotonic()
 
-    while time.time() - t_0 < KEEP_TIME:
+    while time.monotonic() - t_0 < keep_time:
 
-        if psutil.virtual_memory().available > KEEP_FREE + BLOCK_SIZE:
+        if psutil.virtual_memory().available > keep_free + block_size:
 
-            memory.append(bytearray(BLOCK_SIZE))
+            memory.append(bytearray(block_size))
 
             print(f"Available: {psutil.virtual_memory().available / 1024**3:.2f} GB")
 
 
 if __name__ == "__main__":
 
-    fill_memory()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "--time",
+        type=float,
+        default=15,
+        help="持續時間 (s)"
+    )
+
+    parser.add_argument(
+        "--free",
+        type=int,
+        default=256,
+        help="保留記憶體空間 (MiB)"
+    )
+
+    parser.add_argument(
+        "--block",
+        type=int,
+        default=128,
+        help="每次增加記憶體量 (MiB)"
+    )
+
+    args = parser.parse_args()
+
+
+    fill_memory(args.time, args.free, args.block)
