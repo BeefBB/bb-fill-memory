@@ -9,7 +9,7 @@ def fill_memory(
         keep_free=256,
         block_size=128,
         time_out=35,
-        shake=True,
+        shake=False,
         force=False,
         mute=False
     ):
@@ -63,7 +63,7 @@ def fill_memory(
 
                     break
 
-                time.sleep(0.01)
+                time.sleep(0.2)
 
 
             if time.monotonic() - t_print > 0.3:
@@ -85,11 +85,11 @@ def fill_memory(
                     print(f"已填滿! 保持 {keep_time} 秒")
 
 
+            time.sleep(0.2)
+
+
             if shake and memory:
                 memory.popleft()
-
-
-            time.sleep(0.01)
 
 
         if time.monotonic() - t_0 > time_out:
@@ -129,9 +129,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--noshake",
+        "--shake",
         action="store_true",
-        help="禁用記憶體填滿時抖動"
+        help="記憶體填滿時保持抖動"
     )
 
     parser.add_argument(
@@ -154,7 +154,7 @@ if __name__ == "__main__":
         args.free,
         args.block,
         args.timeout,
-        not args.noshake,
+        args.shake,
         args.force,
         args.mute
     )
