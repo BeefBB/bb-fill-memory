@@ -3,7 +3,7 @@ import argparse
 import psutil
 
 
-def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=False):
+def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=False, mute=False):
     """
     Args:
         keep_time:  持續時間 (s)
@@ -11,12 +11,15 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=
         block_size: 每次增加記憶體量 (MiB)
         time_out:   逾時中斷時間 (s)
         force:      忽略記憶體錯誤
+        mute:       靜音輸出
     """
 
     if time_out < keep_time:
-        print(f"警告: 逾時中斷時間 < 持續時間")
-        print(f"實際不會執行到 {keep_time} 秒, 因為到達前就先中斷了")
-        print()
+
+        if not mute:
+            print(f"警告: 逾時中斷時間 < 持續時間")
+            print(f"實際不會執行到 {keep_time} 秒, 因為到達前就先中斷了")
+            print()
 
 
     keep_free *= 1024 ** 2
@@ -44,7 +47,9 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=
 
                 if not force:
 
-                    print(f"中斷: 記憶體錯誤")
+                    if not mute:
+                        print(f"中斷: 記憶體錯誤")
+
                     break
 
                 time.sleep(0.01)
@@ -53,7 +58,9 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=
             if time.monotonic() - t_print > 0.3:
 
                 t_print = time.monotonic()
-                print(f"剩餘: {psutil.virtual_memory().available / 1024**3:.2f} GB")
+
+                if not mute:
+                    print(f"剩餘: {psutil.virtual_memory().available / 1024**3:.2f} GB")
 
         else:
 
@@ -63,7 +70,8 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=
                 block_size = small_block_size
                 t_1 = time.monotonic()
 
-                print(f"已填滿! 保持 {keep_time} 秒")
+                if not mute:
+                    print(f"已填滿! 保持 {keep_time} 秒")
 
             time.sleep(0.01)
 
@@ -110,12 +118,20 @@ if __name__ == "__main__":
         help="忽略記憶體錯誤並繼續執行"
     )
 
+    parser.add_argument(
+        "--mute",
+        action="store_true",
+        help="靜音輸出"
+    )
+
     args = parser.parse_args()
 
 
-    fill_memory(args.time, args.free, args.block, args.timeout, args.force)
+    fill_memory(args.time, args.free, args.block, args.timeout, args.force, args.mute)
 
 
-    print()
-    print("結束")
+    if not args.mute:
+        print()
+        print("結束")
+
     time.sleep(1.5)
