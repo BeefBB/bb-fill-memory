@@ -1,6 +1,7 @@
 import time
 import argparse
 import psutil
+from collections import deque
 
 
 def fill_memory(
@@ -8,6 +9,7 @@ def fill_memory(
         keep_free=256,
         block_size=128,
         time_out=35,
+        shake=True,
         force=False,
         mute=False
     ):
@@ -17,6 +19,7 @@ def fill_memory(
         keep_free:  保留記憶體空間 (MiB)
         block_size: 每次增加記憶體量 (MiB)
         time_out:   逾時中斷時間 (s)
+        shake:      記憶體填滿時保持抖動
         force:      忽略記憶體錯誤
         mute:       靜音輸出
     """
@@ -40,7 +43,7 @@ def fill_memory(
 
     reach = False
 
-    memory = []
+    memory = deque()
 
 
     while not reach or time.monotonic() - t_1 < keep_time:
@@ -48,6 +51,7 @@ def fill_memory(
         if psutil.virtual_memory().available > keep_free + block_size:
 
             try:
+
                 memory.append(bytearray(block_size))
 
             except MemoryError:
@@ -79,6 +83,11 @@ def fill_memory(
 
                 if not mute:
                     print(f"已填滿! 保持 {keep_time} 秒")
+
+
+            if shake and memory:
+                memory.popleft()
+
 
             time.sleep(0.01)
 
@@ -120,6 +129,12 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--noshake",
+        action="store_true",
+        help="禁用記憶體填滿時抖動"
+    )
+
+    parser.add_argument(
         "--force",
         action="store_true",
         help="忽略記憶體錯誤並繼續執行"
@@ -134,7 +149,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
 
-    fill_memory(args.time, args.free, args.block, args.timeout, args.force, args.mute)
+    fill_memory(
+        args.time,
+        args.free,
+        args.block,
+        args.timeout,
+        not args.noshake,
+        args.force,
+        args.mute
+    )
 
 
     if not args.mute:
