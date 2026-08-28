@@ -3,7 +3,14 @@ import argparse
 import psutil
 
 
-def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=False, mute=False):
+def fill_memory(
+        keep_time=25,
+        keep_free=256,
+        block_size=128,
+        time_out=35,
+        force=False,
+        mute=False
+    ):
     """
     Args:
         keep_time:  持續時間 (s)
@@ -87,7 +94,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--time",
         type=float,
-        default=20,
+        default=25,
         help="持續時間 (s)"
     )
 
@@ -108,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--timeout",
         type=int,
-        default=30,
+        default=35,
         help="逾時中斷時間 (s)"
     )
 
