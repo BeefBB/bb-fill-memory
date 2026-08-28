@@ -3,13 +3,14 @@ import argparse
 import psutil
 
 
-def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30):
+def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30, force=False):
     """
     Args:
         keep_time:  持續時間 (s)
         keep_free:  保留記憶體空間 (MiB)
         block_size: 每次增加記憶體量 (MiB)
         time_out:   逾時中斷時間 (s)
+        force:      忽略記憶體錯誤
     """
 
     if time_out < keep_time:
@@ -20,6 +21,7 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30):
 
     keep_free *= 1024 ** 2
     block_size *= 1024 ** 2
+    small_block_size = int(block_size / 16)
 
 
     t_0 = time.monotonic()
@@ -35,7 +37,18 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30):
 
         if psutil.virtual_memory().available > keep_free + block_size:
 
-            memory.append(bytearray(block_size))
+            try:
+                memory.append(bytearray(block_size))
+
+            except MemoryError:
+
+                if not force:
+
+                    print(f"中斷: 記憶體錯誤")
+                    break
+
+                time.sleep(0.01)
+
 
             if time.monotonic() - t_print > 0.3:
 
@@ -47,7 +60,10 @@ def fill_memory(keep_time=20, keep_free=256, block_size=128, time_out=30):
             if not reach:
 
                 reach = True
+                block_size = small_block_size
                 t_1 = time.monotonic()
+
+                print(f"已填滿! 保持 {keep_time} 秒")
 
             time.sleep(0.01)
 
@@ -88,7 +104,18 @@ if __name__ == "__main__":
         help="逾時中斷時間 (s)"
     )
 
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="忽略記憶體錯誤並繼續執行"
+    )
+
     args = parser.parse_args()
 
 
-    fill_memory(args.time, args.free, args.block, args.timeout)
+    fill_memory(args.time, args.free, args.block, args.timeout, args.force)
+
+
+    print()
+    print("結束")
+    time.sleep(1.5)
