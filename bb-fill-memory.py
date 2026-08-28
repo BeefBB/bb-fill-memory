@@ -31,7 +31,7 @@ def fill_memory(
 
     keep_free *= 1024 ** 2
     block_size *= 1024 ** 2
-    small_block_size = int(block_size / 16)
+    small_block_size = max(1, int(block_size / 16))
 
 
     t_0 = time.monotonic()
